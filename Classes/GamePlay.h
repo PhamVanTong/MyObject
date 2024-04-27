@@ -48,7 +48,7 @@ public:
     void setRoundOne();
     void setRoundTwo();
     void setRoundThree();
-    void setRoundFour();
+    //void setRoundFour();
     void setPhysics(Sprite* spri, int tag, int second);
 
     Animation* createAnimation(std::string nameFrame, int numberFrame, float delay);
@@ -60,7 +60,7 @@ private:
     int iHighScore{ 0 };
     bool checkPause{ false };
     int checkWin{ 0 };
-    int checkRound{ 4 };
+    int checkRound{ 1 };
     bool checkItem{ false };
     int xItem;
     int yItem;
