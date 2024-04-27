@@ -24,7 +24,7 @@ public:
 
     void setHealthEnemy(int dame);
     void removeEnemy();
-    void moveEnemy();
+
     
     Animation* createAnimation(std::string nameFrame, int number, float delay);
 

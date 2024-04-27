@@ -58,10 +58,10 @@ bool GamePlay::init()
 
     GamePlay::addButton();
     GamePlay::addSprite();
-    //GamePlay::setRoundOne();
+    GamePlay::setRoundOne();
     //GamePlay::setRoundTwo();
     //GamePlay::setRoundThree();
-    GamePlay::setRoundFour();
+    //GamePlay::setRoundFour();
 
     // keyboard
     this->schedule(CC_SCHEDULE_SELECTOR(GamePlay::updateMove));
@@ -327,7 +327,7 @@ void GamePlay::updateMove(float delay)
         else if (checkRound == 2)
         {
             checkRound++;
-            GamePlay::setRoundThree();
+            //GamePlay::setRoundThree();
         }
         else if (checkRound == 3)
         {
@@ -658,41 +658,7 @@ void GamePlay::setRoundOne()
 {
     auto visibleSize = Director::getInstance()->getVisibleSize();
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
-
-    for (auto i = 0; i < 4; i++)
-    {
-        for (int j = 1; j < 10; j++)
-        {
-            checkWin++;
-            auto sEnemyOne = GameEnemyOne::createGameEnemyOne(checkRound, 0 ,checkWin);
-            sEnemyOne->setPosition(Vec2(visibleSize.width * (0.1 * j) - visibleSize.width * 1, visibleSize.height * (0.9 - 0.1 * i)));
-            sEnemyOne->setTag(3);
-            this->addChild(sEnemyOne, 1);
-        }
-    }
-}
-void GamePlay::setRoundTwo()
-{
-    auto visibleSize = Director::getInstance()->getVisibleSize();
-    Vec2 origin = Director::getInstance()->getVisibleOrigin();
-    
-    for (auto i = 0; i < 4; i++)
-    {
-        for (int j = 1; j < 10; j++)
-        {
-            checkWin++;
-            auto sEnemyTwo = GameEnemyOne::createGameEnemyOne(checkRound, 0 ,checkWin);
-            sEnemyTwo->setPosition(Vec2(visibleSize.width * (0.1 * j), visibleSize.height * (1.9 - 0.1 * i) ));
-            sEnemyTwo->setTag(3);
-            this->addChild(sEnemyTwo, 2);
-        }
-    }
-}
-void GamePlay::setRoundThree()
-{
-    auto visibleSize = Director::getInstance()->getVisibleSize();
-    Vec2 origin = Director::getInstance()->getVisibleOrigin();
-    for (int j = 0; j < 4; j++)
+    for (int j = 3; j < 4; j++)
     {
         for (float i = 0; i < 9; i++)
         {
@@ -705,7 +671,7 @@ void GamePlay::setRoundThree()
     }
     
 }
-void GamePlay::setRoundFour()
+void GamePlay::setRoundTwo()
 {
     auto visibleSize = Director::getInstance()->getVisibleSize();
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
