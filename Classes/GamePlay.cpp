@@ -658,20 +658,36 @@ void GamePlay::setRoundOne()
 {
     auto visibleSize = Director::getInstance()->getVisibleSize();
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
-    for (int j = 3; j < 4; j++)
+    for (float j = 0; j < 4; j++)
     {
         for (float i = 0; i < 9; i++)
         {
-            auto sEnemyTwo = GameEnemyOne::createGameEnemyOne(checkRound, j ,i);
+            auto sEnemyTwo = GameEnemyOne::createGameEnemyOne(checkRound, j, i);
             sEnemyTwo->setPosition(Vec2(visibleSize.width * 0.05, visibleSize.height * (1.5 + i / 10 + j * 0.9)));
             sEnemyTwo->setTag(3);
             this->addChild(sEnemyTwo, 2);
             checkWin++;
         }
     }
-    
 }
 void GamePlay::setRoundTwo()
+{
+    auto visibleSize = Director::getInstance()->getVisibleSize();
+    Vec2 origin = Director::getInstance()->getVisibleOrigin();
+    
+    for (float j = 0; j < 4; j++)
+    {
+        for (float i = 0; i < 9; i++)
+        {
+            auto sEnemyTwo = GameEnemyOne::createGameEnemyOne(checkRound, j, i);
+            sEnemyTwo->setPosition(Vec2(visibleSize.width * 0.95, visibleSize.height * (1.5 + i / 10 + j * 0.9)));
+            sEnemyTwo->setTag(3);
+            this->addChild(sEnemyTwo, 2);
+            checkWin++;
+        }
+    }
+}
+void GamePlay::setRoundThree()
 {
     auto visibleSize = Director::getInstance()->getVisibleSize();
     Vec2 origin = Director::getInstance()->getVisibleOrigin();

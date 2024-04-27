@@ -92,7 +92,7 @@ void GameLazer::getCheckPause()
 void GameLazer::removeLazerAnimation()
 {
     this->stopAllActions();
-    Animate* animateRemove{ Animate::create(GameLazer::createAnimation("lazerAttack", 9, 0.02)) };
+    Animate* animateRemove{ Animate::create(GameLazer::createAnimation("lazerAttack", 9, 0.005)) };
     auto A = cocos2d::CallFunc::create([=]()
         {
             GameLazer::removeLazer();

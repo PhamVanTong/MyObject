@@ -47,7 +47,7 @@ public:
     void addEnemyLazer(float delay);
     void setRoundOne();
     void setRoundTwo();
-    //void setRoundThree();
+    void setRoundThree();
     //void setRoundFour();
     void setPhysics(Sprite* spri, int tag, int second);
 
