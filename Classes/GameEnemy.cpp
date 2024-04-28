@@ -3,8 +3,6 @@
 
 USING_NS_CC;
 
-#define ROTATION_SPEED 180.f
-
 int m_Round;
 float m_Width;
 float m_Height;
@@ -30,6 +28,7 @@ bool GameEnemyOne::init()
     checkRound = m_Round;
     numberHeight = m_Height;
     numberWidth = m_Width;
+    checkRotationSpeed = 180;
 
     if (checkRound == 1)
     {
@@ -50,7 +49,7 @@ bool GameEnemyOne::init()
     {
         checkStart = 0;
         xRotation = 0.85;
-        mHealthEnemy = 5;
+        mHealthEnemy = 1;
         spriteEnemyOne = Sprite::create("enemyOne1.png");
         auto moveDown{ MoveBy::create(2 + (2 * numberHeight / 10 + 2 * numberWidth * 0.9),Vec2(0,  -visibleSize.height * (1 + numberHeight / 10 + numberWidth * 0.9))) };
         auto sequenceCall = CallFunc::create([=]()
@@ -63,19 +62,48 @@ bool GameEnemyOne::init()
     }
     else if (checkRound == 3)
     {
+        mHealthEnemy = 2;
+        spriteEnemyOne = Sprite::create("enemyOne1.png");
+
+        auto moveDown{ MoveBy::create(2 + (2 * numberHeight / 10 ),Vec2(0, -visibleSize.height * (1 + numberHeight / 10))) };
+        auto sequenceCall = CallFunc::create([=]()
+            {
+                checkTime = 0;
+                checkTimeEnd = 10000;
+                checkRotationSpeed = 180;
+                if ((int(numberWidth) % 2) == 0)
+                {
+                    checkStart = 180;
+                    xRotation = 0.25;
+                    this->schedule(CC_SCHEDULE_SELECTOR(GameEnemyOne::moveCircle180, 10), 0.001);
+                }
+                else
+                {
+                    checkStart = 180;
+                    xRotation = 0.75;
+                    this->schedule(CC_SCHEDULE_SELECTOR(GameEnemyOne::moveCircle270, 10), 0.001);
+                }
+                
+            });
+        auto sequenceMain = Sequence::create(moveDown, sequenceCall, nullptr);
+        this->runAction(sequenceMain);
+    }
+    else if (checkRound == 4)
+    {
         mHealthEnemy = 100;
         spriteEnemyOne = Sprite::createWithSpriteFrameName("bossOne1.png");
         Animate* aPlan = Animate::create(GameEnemyOne::createAnimation("bossOne", 6, 0.1));
         spriteEnemyOne->runAction(RepeatForever::create(aPlan));
-
-        auto moveDown{ MoveBy::create(2 + (2 * numberHeight / 10 + 2 * numberWidth * 0.9),Vec2(0,  -visibleSize.height * (1 + numberHeight / 10 + numberWidth * 0.9))) };
-        auto sequenceCall = CallFunc::create([=]()
-            {
-                checkTime = 0;
-                this->schedule(CC_SCHEDULE_SELECTOR(GameEnemyOne::moveCircle180, 10), 0.001);
+        auto moveDown{ MoveBy::create(2, Vec2(0, -visibleSize.height)) };
+        auto sequenceCall = CallFunc::create([=]() {
+            auto moveLeftOne{ MoveBy::create(1, Vec2(-visibleSize.width * 0.25, 0)) };
+            auto moveLeftTwo{ MoveBy::create(2,Vec2(-visibleSize.width * 0.5, 0)) };
+            auto moveRightOne{ MoveBy::create(1,Vec2(visibleSize.width * 0.25, 0)) };
+            auto sequenceRepeat{ Sequence::create(moveLeftOne, moveRightOne, moveRightOne, moveLeftOne, nullptr) };
+            this->runAction(RepeatForever::create(sequenceRepeat));
             });
-        auto sequenceMain = Sequence::create(moveDown, sequenceCall, nullptr);
-        this->runAction(sequenceMain);
+        auto sequenceFunc{ Sequence::create(moveDown, sequenceCall, nullptr) };
+        this->runAction(sequenceFunc);
     }
     spriteEnemyOne->setScale(0.5);
     this->addChild(spriteEnemyOne);
@@ -146,6 +174,7 @@ void GameEnemyOne::moveCircle180(float dt)
                     checkStart = 270;
                     xRotation = 0.85;
                     checkTime = 0;
+ 
                     this->schedule(CC_SCHEDULE_SELECTOR(GameEnemyOne::moveCircle270), 0.01);
                 });
             auto sequenceMain = Sequence::create(moveRight, sequenceCall, nullptr);
@@ -165,10 +194,10 @@ void GameEnemyOne::moveCircle180(float dt)
             this->runAction(sequenceMain);
         }
     }
-    if (checkRound == 1)
+    if (checkRound == 1 || checkRound == 3)
     {
         checkTime += dt;
-        checkRotation = checkStart * Pi / 180 + checkTime * ROTATION_SPEED * Pi / 180;
+        checkRotation = checkStart * Pi / 180 + checkTime * checkRotationSpeed * Pi / 180;
         sinEnemy = std::sin(checkRotation);
         cosEnemy = std::cos(checkRotation);
         this->setPosition(Vec2(visibleSize.width * xRotation + cosEnemy * visibleSize.width * 0.1,
@@ -177,7 +206,7 @@ void GameEnemyOne::moveCircle180(float dt)
     else if (checkRound == 2)
     {
         checkTime += dt;
-        checkRotation = checkStart * Pi / 180 + checkTime * ROTATION_SPEED * Pi / 180;
+        checkRotation = checkStart * Pi / 180 + checkTime * checkRotationSpeed * Pi / 180;
 
         sinEnemy = std::sin(checkRotation);
         cosEnemy = std::cos(checkRotation);
@@ -193,12 +222,13 @@ void GameEnemyOne::moveCircle270(float dt)
 
     if (checkTime > checkTimeEnd)
     {
-        auto delay = DelayTime::create((3 - numberWidth) * (2 * 0.9));
         this->unschedule(CC_SCHEDULE_SELECTOR(GameEnemyOne::moveCircle270));
+        auto delay = DelayTime::create(((4 - numberWidth) * 1.8) + numberWidth * 0.1);
         if (checkRound == 1)
         {
-            auto moveUp{ MoveBy::create(1 ,Vec2(0,visibleSize.height * (0.4 - numberWidth * 0.1))) };
-            auto moveLeft{ MoveBy::create(2.5 - (2 * numberHeight / 10),Vec2(-visibleSize.width * (0.85 - numberHeight / 10) , 0)) };
+            float xxx = 0.5 - numberWidth * 0.1 ;
+            auto moveUp{ MoveBy::create(xxx ,Vec2(0,visibleSize.height * (0.4 - numberWidth * 0.1))) };
+            auto moveLeft{ MoveBy::create(2 - (2 * numberHeight / 10),Vec2(-visibleSize.width * (0.85 - numberHeight * 0.1) , 0)) };
             auto sequenceCall = CallFunc::create([=]()
                 {
                     auto moveRightOne{ MoveBy::create(1,Vec2(visibleSize.width * 0.05, 0)) };
@@ -212,7 +242,7 @@ void GameEnemyOne::moveCircle270(float dt)
         }
         else if (checkRound == 2)
         {
-            auto moveUp{ MoveBy::create(1 ,Vec2(0,visibleSize.height * (0.4 - numberWidth * 0.1))) };
+            auto moveUp{ MoveBy::create(0.5 - numberWidth * 0.1 ,Vec2(0,visibleSize.height * (0.4 - numberWidth * 0.1))) };
             auto moveRight{ MoveBy::create(2.5 - (2 * numberHeight / 10),Vec2(visibleSize.width * (0.85 - float(numberHeight) / 10) , 0)) };
             auto sequenceCall = CallFunc::create([=]()
                 {
@@ -226,27 +256,23 @@ void GameEnemyOne::moveCircle270(float dt)
             this->runAction(seq);
         }
     }
+    checkTime += dt;
+    checkRotation = checkStart * Pi / 180 + checkTime * checkRotationSpeed * Pi / 180;
+
     if (checkRound == 1)
     {
-        checkTime += dt;
-        checkRotation = checkStart * Pi / 180 + checkTime * ROTATION_SPEED * Pi / 180;
-
         sinEnemy = std::sin(checkRotation);
         cosEnemy = std::cos(checkRotation);
         this->setPosition(Vec2(visibleSize.width * xRotation + cosEnemy * visibleSize.width * 0.1,
             visibleSize.height * yRotation + sinEnemy * visibleSize.height * 0.3));
     }
-    else if(checkRound == 2)
+    else if(checkRound == 2 || checkRound == 3)
     {
-        checkTime += dt;
-        checkRotation = checkStart * Pi / 180 + checkTime * ROTATION_SPEED * Pi / 180;
-
         sinEnemy = std::sin(checkRotation);
         cosEnemy = std::cos(checkRotation);
         this->setPosition(Vec2(visibleSize.width * xRotation - cosEnemy * visibleSize.width * 0.1,
             visibleSize.height * yRotation + sinEnemy * visibleSize.height * 0.3));
     }
-    
 }
 
 
