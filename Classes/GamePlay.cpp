@@ -61,11 +61,13 @@ bool GamePlay::init()
     GamePlay::setRoundOne();
     //GamePlay::setRoundTwo();
     //GamePlay::setRoundThree();
-    //GamePlay::setRoundFour();
+
+    /*checkRound = 4;
+    GamePlay::setRoundFour();*/
 
     // keyboard
     this->schedule(CC_SCHEDULE_SELECTOR(GamePlay::updateMove));
-    this->schedule(CC_SCHEDULE_SELECTOR(GamePlay::addEnemyLazer), 1.0);
+    
 
     auto listener = EventListenerKeyboard::create();
     listener->onKeyPressed = CC_CALLBACK_2(GamePlay::onKeyPressed, this);
@@ -231,12 +233,15 @@ void GamePlay::setPhysics(Sprite* spri, int tag, int second)
     bodySprite->setCollisionBitmask(tag);
     spri->setPhysicsBody(bodySprite);
     spri->setTag(tag);
-    auto moveEnemyLazer{ MoveBy::create(second, Vec2(0, -visibleSize.height * 2)) };
-    auto removeEnemyLazer = CallFunc::create([=]() {
-        this->removeChild(spri);
-        });
-    auto seqLazerEnemy{ Sequence::create(moveEnemyLazer, removeEnemyLazer,nullptr) };
-    spri->runAction(seqLazerEnemy);
+    if (checkRound !=4)
+    {
+        auto moveEnemyLazer{ MoveBy::create(second, Vec2(0, -visibleSize.height * 2)) };
+        auto removeEnemyLazer = CallFunc::create([=]() {
+            this->removeChild(spri);
+            });
+        auto seqLazerEnemy{ Sequence::create(moveEnemyLazer, removeEnemyLazer,nullptr) };
+        spri->runAction(seqLazerEnemy);
+    }
 }
 void GamePlay::onKeyPressed(EventKeyboard::KeyCode keyCode, Event* event)
 {
@@ -264,6 +269,7 @@ void GamePlay::onKeyPressed(EventKeyboard::KeyCode keyCode, Event* event)
             cLazerOne->setPosition(pPlaneOne->getPosition());
             cLazerOne->setTag(2);
             this->addChild(cLazerOne, 1);
+            AudioEngine::play2d(Game_Music_Attack, false, 1.0f);
         }
     }
 }
@@ -314,7 +320,6 @@ void GamePlay::updateMove(float delay)
             {
                 body->getNode()->resume();
             }
-            
         }
     }
     if (checkWin == 0)
@@ -323,13 +328,30 @@ void GamePlay::updateMove(float delay)
         {
             checkRound++;
             GamePlay::setRoundTwo();
+            this->unschedule(CC_SCHEDULE_SELECTOR(GamePlay::addEnemyLazer));
         }
-        else if (checkRound == 2)
+        else if (checkRound == 2 )
         {
             checkRound++;
-            //GamePlay::setRoundThree();
+            GamePlay::setRoundThree();
         }
         else if (checkRound == 3)
+        {
+            if (checkRound3 < 4)
+            {
+                GamePlay::setRoundThree();
+            }
+            else
+            {
+                checkRound++;
+                GamePlay::setRoundFour();
+            }
+        }
+        else if (checkRound == 4)
+        {
+            checkRound++;
+        }
+        else
         {
             auto moveWin = GameOver::createScene(mScore, iHighScore);
             Director::getInstance()->replaceScene(moveWin);
@@ -462,7 +484,6 @@ bool GamePlay::onPhysicsContact(PhysicsContact& contact) // physicscontact
     if ((shapeA->getCollisionBitmask() == 2 && shapeB->getCollisionBitmask() == 3)
         || (shapeA->getCollisionBitmask() == 3 && shapeB->getCollisionBitmask() == 2))
     {
-        AudioEngine::play2d(Game_Music_Attack, false, 1.0f);
         if (shapeA->getCollisionBitmask() == 3)
         {
             auto enemyO = dynamic_cast<GameEnemyOne*>(shapeA->getNode());
@@ -618,7 +639,7 @@ void GamePlay::addItem()
     auto visibleSize = Director::getInstance()->getVisibleSize();
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
-    auto checkRandom = random(1, 2);
+    auto checkRandom = random(1, 10);
 
     if (checkRandom == 1)
     {
@@ -634,7 +655,7 @@ void GamePlay::addEnemyLazer(float delay)
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
     Vector<PhysicsBody*> bodies = world->getAllBodies();
-    if (checkRound == 1)
+    if (checkRound == 1 || checkRound == 2)
     {
         for (auto body : bodies)
         {
@@ -642,13 +663,42 @@ void GamePlay::addEnemyLazer(float delay)
             {
                 float xEnemy = body->getNode()->getPosition().x;
                 float yEnemy{ body->getNode()->getPosition().y };
-                auto randomLazerEnemy = random(1, 2);
+                auto randomLazerEnemy = random(1, 20);
                 if (randomLazerEnemy == 1)
                 {
                     auto enemyLazer{ Sprite::create(Game_Sprite_Lazer) };
                     enemyLazer->setPosition(Vec2(xEnemy, yEnemy));
                     this->addChild(enemyLazer, 5);
-                    GamePlay::setPhysics(enemyLazer, 11, 2);
+                    GamePlay::setPhysics(enemyLazer, 3, 2);
+                }
+            }
+        }
+    }
+    else if (checkRound == 4)
+    {
+        for (auto body : bodies)
+        {
+            if (body->getNode()->getTag() == 20)
+            {
+                float xEnemy = body->getNode()->getPosition().x;
+                float yEnemy{ body->getNode()->getPosition().y };
+                auto randomLazerEnemy = random(1, 2);
+                if (randomLazerEnemy == 1)
+                {
+                    for (int i = -1; i < 2; i++)
+                    {
+                        auto enemyLazer1{ Sprite::create(Game_Sprite_Lazer) };
+                        enemyLazer1->setPosition(Vec2(xEnemy, yEnemy));
+                        this->addChild(enemyLazer1, 5);
+                        GamePlay::setPhysics(enemyLazer1, 3, 2);
+
+                        auto moveDown1 {MoveBy::create(3, Vec2(visibleSize.width * 0.5 * i, -visibleSize.height * 2)) };
+                        auto removeEnemyLazer = CallFunc::create([=]() {
+                            this->removeChild(enemyLazer1);
+                            });
+                        auto seqe{ Sequence::create(moveDown1, removeEnemyLazer,nullptr) };
+                        enemyLazer1->runAction(seqe);
+                    }
                 }
             }
         }
@@ -669,6 +719,12 @@ void GamePlay::setRoundOne()
             checkWin++;
         }
     }
+    auto delayGame = DelayTime::create(15);
+    auto callfuncUpdate = CallFunc::create([=]() {
+        this->schedule(CC_SCHEDULE_SELECTOR(GamePlay::addEnemyLazer), 2.0);
+        });
+    auto sequenceDelay{ Sequence::create(delayGame, callfuncUpdate, nullptr) };
+    this->runAction(sequenceDelay);
 }
 void GamePlay::setRoundTwo()
 {
@@ -686,16 +742,53 @@ void GamePlay::setRoundTwo()
             checkWin++;
         }
     }
+    auto delayGame = DelayTime::create(15);
+    auto callfuncUpdate = CallFunc::create([=]() {
+        this->schedule(CC_SCHEDULE_SELECTOR(GamePlay::addEnemyLazer), 2.0);
+        });
+    auto sequenceDelay{ Sequence::create(delayGame, callfuncUpdate, nullptr) };
+    this->runAction(sequenceDelay);
 }
 void GamePlay::setRoundThree()
 {
     auto visibleSize = Director::getInstance()->getVisibleSize();
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
+    float x;
 
-    auto sEnemyTwo = GameEnemyOne::createGameEnemyOne(checkRound, 0, 0);
-    sEnemyTwo->setPosition(Vec2(visibleSize.width * 0.05, visibleSize.height * 1.5));
-    sEnemyTwo->setTag(3);
-    this->addChild(sEnemyTwo, 2);
+    if (checkRound3 % 2  == 0)
+    {
+        x = 0.15;
+    }
+    else
+    {
+        x = 0.85;
+    }
+    for (float i = 0; i < 10; i++)
+    {
+        auto spriteEnemy = GameEnemyOne::createGameEnemyOne(checkRound, checkRound3, i);
+        spriteEnemy->setPosition(Vec2(visibleSize.width * x, visibleSize.height * (1.5 + i / 10)));
+        spriteEnemy->setTag(3);
+        this->addChild(spriteEnemy, 2);
+        checkWin++;
+    }
+    checkRound3++;
+}
+void GamePlay::setRoundFour()
+{
+    auto visibleSize = Director::getInstance()->getVisibleSize();
+    Vec2 origin = Director::getInstance()->getVisibleOrigin();
+
+    auto spriteBoss{ GameEnemyOne::createGameEnemyOne(checkRound, 0, 0) };
+    spriteBoss->setPosition(Vec2(visibleSize.width * 0.5, visibleSize.height * 1.8));
+    spriteBoss->setTag(20);
+    this->addChild(spriteBoss);
     checkWin++;
+
+    auto delayGame = DelayTime::create(2);
+    auto callfuncUpdate = CallFunc::create([=]() {
+        this->schedule(CC_SCHEDULE_SELECTOR(GamePlay::addEnemyLazer), 1.0);
+        });
+    auto sequenceDelay{ Sequence::create(delayGame, callfuncUpdate, nullptr) };
+    this->runAction(sequenceDelay);
 }
 

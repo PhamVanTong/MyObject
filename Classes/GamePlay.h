@@ -36,8 +36,7 @@ public:
     Sprite* spriteScore;
     Sprite* spriteGold;
     
-    
-
+    Animation* createAnimation(std::string nameFrame, int numberFrame, float delay);
     virtual void onKeyPressed(EventKeyboard::KeyCode keyCode, Event* event);
     virtual void onKeyRealesed(EventKeyboard::KeyCode keyCode, Event* event);
     void updateMove(float);
@@ -45,13 +44,12 @@ public:
     void addItem();
     bool onPhysicsContact(PhysicsContact& contact);
     void addEnemyLazer(float delay);
+    void setPhysics(Sprite* spri, int tag, int second);
     void setRoundOne();
     void setRoundTwo();
     void setRoundThree();
+    void setRoundFour();
     //void setRoundFour();
-    void setPhysics(Sprite* spri, int tag, int second);
-
-    Animation* createAnimation(std::string nameFrame, int numberFrame, float delay);
 private:
     int mHealth{ 3 };
     int mDame{ 1 };
@@ -60,12 +58,13 @@ private:
     int iHighScore{ 0 };
     bool checkPause{ false };
     int checkWin{ 0 };
-    int checkRound{ 1 };
     bool checkItem{ false };
     int xItem;
     int yItem;
-   
+    int checkRound{ 1 };
+    int checkRound3{ 0 };
     PhysicsWorld* world;
+    
     void setPhysicWorld(PhysicsWorld* _world)
     {
         world = _world;
